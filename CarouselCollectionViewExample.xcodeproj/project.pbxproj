@@ -15,6 +15,7 @@
 		AD12C8E62873BF0800159074 /* CarouselCollectionViewExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD12C8E52873BF0800159074 /* CarouselCollectionViewExampleTests.swift */; };
 		AD12C8F02873BF0800159074 /* CarouselCollectionViewExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD12C8EF2873BF0800159074 /* CarouselCollectionViewExampleUITests.swift */; };
 		AD12C8F22873BF0800159074 /* CarouselCollectionViewExampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD12C8F12873BF0800159074 /* CarouselCollectionViewExampleUITestsLaunchTests.swift */; };
+		AD12C9002873C35300159074 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = AD12C8FF2873C35300159074 /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD12C9002873C35300159074 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,6 +142,9 @@
 			dependencies = (
 			);
 			name = CarouselCollectionViewExample;
+			packageProductDependencies = (
+				AD12C8FF2873C35300159074 /* SnapKit */,
+			);
 			productName = CarouselCollectionViewExample;
 			productReference = AD12C8CB2873BF0600159074 /* CarouselCollectionViewExample.app */;
 			productType = "com.apple.product-type.application";
@@ -212,6 +217,9 @@
 				Base,
 			);
 			mainGroup = AD12C8C22873BF0600159074;
+			packageReferences = (
+				AD12C8FE2873C35300159074 /* XCRemoteSwiftPackageReference "SnapKit" */,
+			);
 			productRefGroup = AD12C8CC2873BF0600159074 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -592,6 +600,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AD12C8FE2873C35300159074 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AD12C8FF2873C35300159074 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AD12C8FE2873C35300159074 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AD12C8C32873BF0600159074 /* Project object */;
 }
