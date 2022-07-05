@@ -13,6 +13,10 @@ class ViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 16
+        layout.itemSize = CGSize(
+            width: UIScreen.main.bounds.width - 32,
+            height: 300.0
+        )
 
         let collectionView = UICollectionView(
             frame: .zero,
@@ -28,11 +32,14 @@ class ViewController: UIViewController {
         return collectionView
     }()
 
-    private let colors: [UIColor] = [.red, .orange, .yellow, .green, .blue]
+    private let colors: [UIColor] = [.red, .orange, .yellow, .green, .blue, .red]
+
+    private var currentIndex = 0.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+        activateTimer()
     }
 }
 
@@ -59,17 +66,6 @@ extension ViewController: UICollectionViewDataSource {
 }
 
 extension ViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        return CGSize(
-            width: UIScreen.main.bounds.width - 32,
-            height: 300.0
-        )
-    }
-
     func scrollViewWillEndDragging(
         _ scrollView: UIScrollView,
         withVelocity velocity: CGPoint,
@@ -78,16 +74,13 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else {
             return
         }
-        print("layout.minimumLineSpacing: \(layout.minimumLineSpacing)")
-        let cellWidthIncludingSpacing = UIScreen.main.bounds.width - 32 + layout.minimumLineSpacing
-        print("cellWidthIncludingSpacing: \(cellWidthIncludingSpacing)")
+        let cellSize = UIScreen.main.bounds.width - 32
+
+        let cellWidthIncludingSpacing = cellSize + layout.minimumLineSpacing
 
         var offset = targetContentOffset.pointee
         let index = (offset.x + scrollView.contentInset.left) / cellWidthIncludingSpacing
         var roundedIndex = round(index)
-        print("targetContentOffset.pointee: \(targetContentOffset.pointee)")
-        print("scrollView.contentInset.left: \(scrollView.contentInset.left)")
-        print("index: \(index)")
 
         if scrollView.contentOffset.x > targetContentOffset.pointee.x { roundedIndex = floor(index) }
         else if scrollView.contentOffset.x < targetContentOffset.pointee.x {
@@ -95,7 +88,7 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         } else {
             roundedIndex = round(index)
         }
-
+        currentIndex = roundedIndex
         offset = CGPoint(
             x: (roundedIndex * cellWidthIncludingSpacing) - scrollView.contentInset.left,
             y: -scrollView.contentInset.top
@@ -130,6 +123,27 @@ private extension ViewController {
             $0.trailing.equalToSuperview()
             $0.height.equalTo(300.0)
         }
+
+    }
+
+    func activateTimer() {
+        let _ = Timer.scheduledTimer(
+            timeInterval: 1,
+            target: self,
+            selector: #selector(repeatAction),
+            userInfo: nil,
+            repeats: true)
+    }
+
+    @objc func repeatAction() {
+        if Int(currentIndex) == colors.count - 1 {
+            collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .centeredHorizontally, animated: false)
+            currentIndex = 0
+            return
+        }
+        collectionView.scrollToItem(at: IndexPath(row: Int(currentIndex) + 1, section: 0), at: .centeredHorizontally, animated: true)
+        currentIndex += 1
+
 
     }
 }
