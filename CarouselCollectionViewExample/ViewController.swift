@@ -32,14 +32,37 @@ class ViewController: UIViewController {
         return collectionView
     }()
 
-    private let colors: [UIColor] = [.red, .orange, .yellow, .green, .blue, .red]
+    private lazy var activateButton: UIButton = {
+        let button = UIButton()
+        button.layer.cornerRadius = 10
+        button.layer.borderColor = UIColor.lightGray.cgColor
+        button.layer.borderWidth = 0.3
+
+        button.setTitleColor(.label, for: .normal)
+        button.setTitle("Activate", for: .normal)
+
+        button.addTarget(self, action: #selector(activateTimer), for: .touchUpInside)
+        return button
+    }()
+
+
+    private let colors: [UIColor] = [.red, .orange, .yellow, .green, .blue]
 
     private var currentIndex = 0.0
+
+    private var isActive: Bool = false
+
+    private var timer: Timer?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
-        activateTimer()
+    }
+
+    override func viewDidLayoutSubviews() {
+        let segmentSize = colors.count
+        collectionView.scrollToItem(at: IndexPath(row: segmentSize, section: 0), at: .centeredHorizontally, animated: false)
+        currentIndex = CGFloat(segmentSize)
     }
 }
 
@@ -48,7 +71,7 @@ extension ViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        return colors.count
+        return colors.count * 3
     }
 
     func collectionView(
@@ -60,7 +83,7 @@ extension ViewController: UICollectionViewDataSource {
             for: indexPath
         )
         cell.layer.cornerRadius = 10
-        cell.backgroundColor = colors[indexPath.row]
+        cell.backgroundColor = colors[indexPath.row % colors.count]
         return cell
     }
 }
@@ -81,20 +104,42 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         var offset = targetContentOffset.pointee
         let index = (offset.x + scrollView.contentInset.left) / cellWidthIncludingSpacing
         var roundedIndex = round(index)
-
+        print(roundedIndex)
         if scrollView.contentOffset.x > targetContentOffset.pointee.x { roundedIndex = floor(index) }
         else if scrollView.contentOffset.x < targetContentOffset.pointee.x {
             roundedIndex = ceil(index)
         } else {
             roundedIndex = round(index)
         }
-        currentIndex = roundedIndex
+
         offset = CGPoint(
             x: (roundedIndex * cellWidthIncludingSpacing) - scrollView.contentInset.left,
             y: -scrollView.contentInset.top
         )
 
+        print("scrollView.contentOffset.x: \(scrollView.contentOffset.x), scrollView.bounds.width * CGFloat(colors.count * 3) - ((32 * 15)): \(scrollView.bounds.width * CGFloat(colors.count * 3) - (32 * 15) - 16)")
+        if scrollView.contentOffset.x <= (-16 - (cellSize / 4)) {
+            roundedIndex = CGFloat(colors.count * 3 - 1)
+            offset = CGPoint(
+                x: (roundedIndex * cellWidthIncludingSpacing) - scrollView.contentInset.left,
+                y: -scrollView.contentInset.top
+            )
+            targetContentOffset.pointee = offset
+
+
+        } else if scrollView.contentOffset.x > scrollView.bounds.width * CGFloat(colors.count * 3) - (32 * 15) - 16 {
+            roundedIndex = 0
+            offset = CGPoint(
+                x: (roundedIndex * cellWidthIncludingSpacing) - scrollView.contentInset.left,
+                y: -scrollView.contentInset.top
+            )
+            targetContentOffset.pointee = offset
+
+        } else {
+            targetContentOffset.pointee = offset
+        }
         targetContentOffset.pointee = offset
+        
     }
 }
 
@@ -111,7 +156,8 @@ extension ViewController: UICollectionViewDelegate {
 private extension ViewController {
     func setupViews() {
         [
-            collectionView
+            collectionView,
+            activateButton
         ]
             .forEach {
                 view.addSubview($0)
@@ -124,27 +170,55 @@ private extension ViewController {
             $0.height.equalTo(300.0)
         }
 
+        activateButton.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(100.0)
+            $0.height.equalTo(50.0)
+        }
+
     }
 
-    func activateTimer() {
-        let _ = Timer.scheduledTimer(
-            timeInterval: 1,
-            target: self,
-            selector: #selector(repeatAction),
-            userInfo: nil,
-            repeats: true)
+    @objc func activateTimer() {
+        if isActive {
+            timer?.invalidate()
+            activateButton.setTitle("Activate", for: .normal)
+        } else {
+            timer = Timer.scheduledTimer(
+                timeInterval: 1,
+                target: self,
+                selector: #selector(repeatAction),
+                userInfo: nil,
+                repeats: true)
+            activateButton.setTitle("Deactivate", for: .normal)
+        }
+        isActive = !isActive
+
+
+    }
+
+
+    func stopTimer() {
+        guard let timer = self.timer else { return }
+
+        if timer.isValid {
+            timer.invalidate()
+        }
     }
 
     @objc func repeatAction() {
-        if Int(currentIndex) == colors.count - 1 {
-            collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .centeredHorizontally, animated: false)
+        if Int(currentIndex) == colors.count * 3 - 1 {
+            collectionView.scrollToItem(
+                at: IndexPath(row: 0, section: 0),
+                at: .centeredHorizontally, animated: false
+            )
             currentIndex = 0
             return
         }
-        collectionView.scrollToItem(at: IndexPath(row: Int(currentIndex) + 1, section: 0), at: .centeredHorizontally, animated: true)
         currentIndex += 1
-
-
+        collectionView.scrollToItem(
+            at: IndexPath(row: Int(currentIndex), section: 0),
+            at: .centeredHorizontally, animated: true
+        )
     }
 }
 
